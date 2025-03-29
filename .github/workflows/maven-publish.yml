@@ -1,24 +1,65 @@
-name: Security Scan
+name: SOX Compliant CI/CD
 
 on:
   push:
     branches:
-      - main
+      - develop  # Development branch
   pull_request:
     branches:
-      - main
+      - main  # Target production branch
 
 jobs:
-  security_scan:
+  build_and_test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0 # Important for Snyk to work correctly
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/gradle@master # Or snyk/actions/maven, snyk/actions/npm, etc.
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          args: --all-projects --fail-on=all
+          python-version: "3.9"
+
+      - name: Install dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Tests
+        run: |
+          source venv/bin/activate
+          pytest tests/  # Run all tests in the tests directory
+
+  code_review:
+    needs: build_and_test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Check for Required Approvals
+        uses: actions/github-script@v6
+        id: check_approvals
+        with:
+          script: |
+            const requiredApprovals = 2; // Adjust as needed
+            const approvals = context.payload.pull_request.approved;
+            if (!approvals || approvals.length < requiredApprovals) {
+              core.setFailed(`At least ${requiredApprovals} approvals are required to merge.`);
+            }
+
+      - name: Block Merge (if necessary)
+        if: steps.check_approvals.outcome == 'failure'
+        run: exit 1
+
+  deploy:
+    needs: code_review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.code_review.result == 'success'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy to Production  # Replace with your deployment steps
+        run: |
+          echo "Placeholder for deployment"
