@@ -24,7 +24,7 @@ jobs:
         run: pip install requests
 
       - name: Run Security Configuration Script
-                env:
+        env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}  # Use PAT instead of default token
           REPO_NAME: ${{ github.repository }}
         run: python .github/scripts/setup_security.py
