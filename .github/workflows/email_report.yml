@@ -25,9 +25,9 @@ jobs:
           server_address: ${{ secrets.SMTP_SERVER }}
           server_port: ${{ secrets.SMTP_PORT }}
           username: ${{ secrets.SMTP_USERNAME }}
-          password: ${{ secrets.SMTP_PASSWORD }}
+          password: "Jackson#1526"
           subject: "GitHub Report - $(date)"
           body: "Please find the latest GitHub report attached."
-          to: "recipient@example.com"
+          to: "bijumathewt@gmail.com"
           from: "GitHub Actions <your-email@gmail.com>"
-          attachments: report.txt
+         
