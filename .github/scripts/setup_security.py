@@ -49,4 +49,4 @@ def set_branch_protection(branch="main"):
 if __name__ == "__main__":
     print("🔐 Setting up SOX security configurations...")
     set_branch_protection()
-    print("🚀 Security setup complete!")
+    print("🚀 Security setup completed!")
