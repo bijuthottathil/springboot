@@ -1,0 +1,33 @@
+name: Send Report Email
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '0 9 * * 1' # Runs every Monday at 9 AM UTC
+
+jobs:
+  send-email:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Generate Report
+        run: |
+          echo "GitHub Report for $(date)" > report.txt
+          echo "Latest commits and actions summary..." >> report.txt
+
+      - name: Send Email
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "GitHub Report - $(date)"
+          body: "Please find the latest GitHub report attached."
+          to: "recipient@example.com"
+          from: "GitHub Actions <your-email@gmail.com>"
+          attachments: report.txt
